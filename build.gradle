@@ -1,0 +1,63 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'ninja.miserable.blossom' version '1.0.1'
+    id 'com.github.johnrengelman.shadow' version '1.2.3'
+    id 'org.spongepowered.plugin' version '0.6'
+}
+
+def isJenkins = System.getenv("BUILD_NUMBER") != null
+def suffix = "-SNAPSHOT"
+
+group = 'rocks.devonthe.disintegrate'
+version = '0.1.0'
+description = 'A Discord Bot for Sponge-based Minecraft servers.'
+
+if (isJenkins) {
+    version += "." + System.getenv("BUILD_NUMBER")
+}
+
+version += suffix
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        name = 'sponge'
+        url = 'http://repo.spongepowered.org/maven'
+    }
+    maven {
+        name = 'Discord4j'
+        url = 'https://jitpack.io'
+    }
+    maven {
+        name = 'Nucleus'
+        url = 'http://repo.drnaylor.co.uk/artifactory/list/minecraft'
+    }
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+shadowJar {
+    dependencies {
+        include(dependency("com.github.austinv11:Discord4j:2.7.0"))
+    }
+    archiveName = "Disintegrate-${version}-all.jar"
+}
+
+dependencies {
+    compile("org.spongepowered:spongeapi:5.1.0")
+    compile("com.github.austinv11:Discord4j:2.7.0")
+    compile("io.github.nucleuspowered:nucleus-api:0.25.0-S5.1")
+}
+
+blossom {
+    def pluginInfo = 'src/main/java/rocks/devonthe/disintegrate/PluginInfo.java'
+
+    replaceToken '@NAME@', project.name, pluginInfo
+    replaceToken '@VERSION@', version, pluginInfo
+    replaceToken '@DESCRIPTION@', project.description, pluginInfo
+}
